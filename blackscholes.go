@@ -10,29 +10,7 @@ func isFinite(f float64) bool {
 
 // StdNormCDF calculates the standard normal cumulative distribution function
 func StdNormCDF(x float64) float64 {
-	var probability float64
-	if x >= 8 {
-		probability = 1
-	} else if x <= -8 {
-		probability = 0
-	} else {
-		for i := 0; i < 100; i++ {
-			probability += (math.Pow(x, float64(2*i+1)) / doubleFactorial(float64(2*i+1)))
-		}
-		probability *= math.Exp(-0.5 * math.Pow(x, 2))
-		probability /= math.Sqrt(2 * math.Pi)
-		probability += 0.5
-	}
-	return probability
-}
-
-// DoubleFactorial calculates the double factorial of n
-func doubleFactorial(n float64) float64 {
-	val := 1.0
-	for i := n; i > 1; i -= 2 {
-		val *= i
-	}
-	return val
+	return 0.5 * math.Erfc(-x/math.Sqrt2)
 }
 
 // BlackScholes calculates the Black-Scholes option pricing formula
