@@ -52,6 +52,42 @@ func TestCalculateGetDelta(t *testing.T) {
 	}
 }
 
+// TestGetThetaCallVsPut guards against the case-routing bug where GetTheta
+// compared callPut against lowercase "call" instead of the package convention
+// "CALL", which silently returned the put theta for CALL options.
+func TestGetThetaCallVsPut(t *testing.T) {
+	s, k, ti, v, r := 100.0, 100.0, 0.5, 0.2, 0.05
+	scale := 365
+
+	callTheta := GetTheta(s, k, ti, v, r, "CALL", scale)
+	putTheta := GetTheta(s, k, ti, v, r, "PUT", scale)
+
+	if callTheta == putTheta {
+		t.Fatalf("GetTheta returned identical theta for CALL and PUT (%f); callPut case routing is broken", callTheta)
+	}
+	if !(callTheta < putTheta) {
+		t.Errorf("expected call theta (%f) < put theta (%f) for r=%f", callTheta, putTheta, r)
+	}
+	t.Logf("call theta: %f, put theta: %f", callTheta, putTheta)
+}
+
+// TestGetRhoCallVsPut guards against the same case-routing bug in GetRho.
+func TestGetRhoCallVsPut(t *testing.T) {
+	s, k, ti, v, r := 100.0, 100.0, 0.5, 0.2, 0.05
+	scale := 100
+
+	callRho := GetRho(s, k, ti, v, r, "CALL", scale)
+	putRho := GetRho(s, k, ti, v, r, "PUT", scale)
+
+	if callRho == putRho {
+		t.Fatalf("GetRho returned identical rho for CALL and PUT (%f); callPut case routing is broken", callRho)
+	}
+	if !(callRho > putRho) {
+		t.Errorf("expected call rho (%f) > put rho (%f)", callRho, putRho)
+	}
+	t.Logf("call rho: %f, put rho: %f", callRho, putRho)
+}
+
 func TestCalculateIV(t *testing.T) {
 	tests := []struct {
 		name            string

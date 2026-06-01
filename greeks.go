@@ -57,7 +57,7 @@ func GetRho(s, k, t, v, r float64, callPut string, scale int) float64 {
 	if scale == 0 {
 		scale = 100
 	}
-	if callPut == "call" {
+	if callPut == "CALL" {
 		return callRho(s, k, t, v, r) / float64(scale)
 	}
 	return putRho(s, k, t, v, r) / float64(scale)
@@ -95,7 +95,7 @@ func GetTheta(s, k, t, v, r float64, callPut string, scale int) float64 {
 	if scale == 0 {
 		scale = 365
 	}
-	if callPut == "call" {
+	if callPut == "CALL" {
 		return callTheta(s, k, t, v, r) / float64(scale)
 	}
 	return putTheta(s, k, t, v, r) / float64(scale)
