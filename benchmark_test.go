@@ -101,7 +101,7 @@ func BenchmarkDeltaSearch(b *testing.B) {
 	b.Run("new_erfc", func(b *testing.B) {
 		for n := 0; n < b.N; n++ {
 			for _, s := range strikes {
-				iv, _ := GetImpliedVolatility(s.premium, underlying, s.price, timeToExpiry, riskFreeRate, "PUT")
+				iv := GetImpliedVolatility(s.premium, underlying, s.price, timeToExpiry, riskFreeRate, "PUT", s.vol)
 				StdNormCDF(GetW(underlying, s.price, timeToExpiry, iv, riskFreeRate))
 			}
 		}

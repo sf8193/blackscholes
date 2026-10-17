@@ -19,7 +19,7 @@ func TestImpliedVolWingIsExact(t *testing.T) {
 		{6100, 0.15, "CALL"},
 	} {
 		price := BlackScholes(s, tc.k, t0, tc.vol, r, tc.callPut)
-		iv, ok := GetImpliedVolatility(price, s, tc.k, t0, r, tc.callPut)
+		iv, ok := SolveImpliedVolatility(price, s, tc.k, t0, r, tc.callPut)
 		if !ok {
 			t.Fatalf("%s %.0f: no vol identified for price %.4f", tc.callPut, tc.k, price)
 		}
@@ -63,13 +63,13 @@ func TestImpliedVolNotIdentified(t *testing.T) {
 		{"just under the min-vol price", atMin * (1 - 1e-9), 100, 100, 0.25, 0.05, "CALL"},
 		{"just over the max-vol price", atMax * (1 + 1e-9), 100, 100, 0.25, 0.05, "CALL"},
 	} {
-		iv, ok := GetImpliedVolatility(tc.price, tc.s, tc.k, tc.t, tc.r, tc.callPut)
+		iv, ok := SolveImpliedVolatility(tc.price, tc.s, tc.k, tc.t, tc.r, tc.callPut)
 		if ok || iv != 0 {
 			t.Errorf("%s: got (%v, %v), want (0, false)", tc.name, iv, ok)
 		}
 	}
 	// Deep in the money near expiry: a vol solves but vega is too small to trust it.
-	if _, ok := GetImpliedVolatility(100-50*math.Exp(-0.05*0.001), 100, 50, 0.001, 0.05, "CALL"); ok {
+	if _, ok := SolveImpliedVolatility(100-50*math.Exp(-0.05*0.001), 100, 50, 0.001, 0.05, "CALL"); ok {
 		t.Error("deep ITM near expiry: ok = true, want false")
 	}
 }
@@ -78,7 +78,7 @@ func TestImpliedVolNotIdentified(t *testing.T) {
 func TestImpliedVolBandEdges(t *testing.T) {
 	for _, vol := range []float64{5e-4, 10.0} {
 		price := BlackScholes(100, 100, 0.25, vol, 0.05, "CALL")
-		iv, _ := GetImpliedVolatility(price, 100, 100, 0.25, 0.05, "CALL")
+		iv, _ := SolveImpliedVolatility(price, 100, 100, 0.25, 0.05, "CALL")
 		if math.Abs(iv-vol) > 1e-9 {
 			t.Errorf("price at vol %v: iv %v", vol, iv)
 		}
@@ -93,7 +93,7 @@ func TestImpliedVolVegaFloor(t *testing.T) {
 		wantOk bool
 	}{{94.6, true}, {94.2, false}} {
 		price := BlackScholes(100, tc.k, 0.01, 0.2, 0.05, "CALL")
-		iv, ok := GetImpliedVolatility(price, 100, tc.k, 0.01, 0.05, "CALL")
+		iv, ok := SolveImpliedVolatility(price, 100, tc.k, 0.01, 0.05, "CALL")
 		if ok != tc.wantOk || math.Abs(iv-0.2) > 1e-9 {
 			t.Errorf("K %.1f: got (%v, %v), want (0.2, %v)", tc.k, iv, ok, tc.wantOk)
 		}
