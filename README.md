@@ -39,8 +39,9 @@ func main() {
     
     // Calculate implied volatility
     marketPrice := 2.50
-    iv := blackscholes.GetImpliedVolatility(marketPrice, strike, underlying, timeToExpiry, riskFreeRate, "CALL", 0.2)
-    fmt.Printf("Implied volatility: %.2f%%\n", iv*100)
+    if iv, ok := blackscholes.GetImpliedVolatility(marketPrice, underlying, strike, timeToExpiry, riskFreeRate, "CALL"); ok {
+        fmt.Printf("Implied volatility: %.2f%%\n", iv*100)
+    }
     
     // Calculate delta
     delta, _ := blackscholes.GetDelta(underlying, strike, timeToExpiry, volatility, riskFreeRate, "CALL")
@@ -69,19 +70,20 @@ Calculate theoretical option price using Black-Scholes formula.
 ### Implied Volatility
 
 ```go
-func GetImpliedVolatility(premium, strike, underlying, timeToExpiry, riskFreeRate float64, contractType string, estimate float64) float64
+func GetImpliedVolatility(premium, underlying, strike, timeToExpiry, riskFreeRate float64, contractType string) (iv float64, ok bool)
 ```
 
-Calculate implied volatility using binary search method.
+Invert an option price to a volatility (decimal, 0.20 = 20%) by bisection over 0.0005 to 10.0, 60 fixed iterations.
+
+`ok` is false when the price cannot identify a volatility: a non-positive price, a price outside what the model can reach, or a vega at the solution below $0.05 per 1.00 of vol (deep in the money near expiry, where any vol reproduces the price). Skip the row when `ok` is false. `underlying`, `strike` and `timeToExpiry` must be finite and positive.
 
 **Parameters:**
 - `premium`: Market price of the option
-- `strike`: Strike price of option
 - `underlying`: Current price of underlying asset
+- `strike`: Strike price of option
 - `timeToExpiry`: Time to expiration in years
 - `riskFreeRate`: Risk-free interest rate as decimal
 - `contractType`: "CALL" or "PUT"
-- `estimate`: Initial volatility estimate (use 0.0 for automatic)
 
 ### Greeks
 

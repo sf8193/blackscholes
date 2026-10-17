@@ -114,7 +114,10 @@ func TestCalculateIV(t *testing.T) {
 	// func BSImpliedVol(callType bool, lastTradedPrice float64, underlying float64, strike float64, timeToExpiration float64, startAnchorVolatility float64, riskFreeInterest float64, dividend float64) float64 {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			iv := GetImpliedVolatility(tt.premium, tt.strike, tt.underlyingValue, tt.timeToExpiry, tt.riskFreeRate, tt.contractType, 0)
+			iv, ok := GetImpliedVolatility(tt.premium, tt.strike, tt.underlyingValue, tt.timeToExpiry, tt.riskFreeRate, tt.contractType)
+			if !ok {
+				t.Fatalf("no vol identified")
+			}
 			if iv == 0 {
 				t.Errorf("calculateDelta() returned zero delta")
 			}
