@@ -93,6 +93,18 @@ func GetVega(underlying, strike, timeToExpiry, volatility, riskFreeRate float64)
 func GetRho(underlying, strike, timeToExpiry, volatility, riskFreeRate float64, contractType string) float64
 ```
 
+### Quotes from a provider
+
+For a caller that has a market quote rather than clean inputs, these accept any spelling of the right and refuse a quote the model cannot be asked about:
+
+```go
+func Right(putCall string) string // "C", "call", "P", "Put", ... -> "CALL" or "PUT"; "" for anything else
+func ImpliedVol(price, underlying, strike, timeToExpiry, riskFreeRate float64, putCall string) (iv float64, ok bool)
+func DeltaAtVol(underlying, strike, timeToExpiry, volatility, riskFreeRate float64, putCall string) (float64, error)
+```
+
+`ImpliedVol` is `GetImpliedVolatility` plus checks: `ok` is false when the spot, strike or time to expiry is not positive, the right is unknown, or the solved vol falls outside [0.05%, 1000%) (a price below intrinsic value, or one no sane vol explains). `DeltaAtVol` is `GetDelta` with the same quote checks.
+
 ## Performance
 
 - **Implied volatility**: ~16ns per calculation (binary search method)
